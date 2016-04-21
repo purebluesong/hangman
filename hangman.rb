@@ -96,7 +96,9 @@ def statisticLetter wordsList
 end
 
 def getHighestLetterFrom dict
-  
+  top = dict.first
+  dict.each {|letter| top = letter if letter[1] >top[1]}
+  top[0]
 end
 
 def guessOnce letter
