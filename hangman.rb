@@ -1,6 +1,8 @@
 require 'restclient'
 require 'json'
 
+
+#---------------------------config variable------------------------
 @url = 'https://strikingly-hangman.herokuapp.com/game/on'
 @playerID = 'purebluesong@gmail.com'
 @wordFileName = 'words.txt'
@@ -36,7 +38,7 @@ require 'json'
 @currentBucket = nil
 
 
-# ---------------------------------------------------------------
+# ----------------------------the web process layer-----------------------------------
 def postData data
   begin
     res = JSON.parse RestClient.post(@url,data.to_json,:content_type => :json,:accept => :json)
@@ -70,7 +72,7 @@ end
 def progSubmit
   postData({:sessionID=>@sessionID, :action=>@submitAction})[@data]
 end
-# -------------------------------------------------------------------------
+# -----------------------------------the core algo--------------------------------------
 @missingWord = []
 @wrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
 def guessWord
@@ -118,7 +120,6 @@ def getHighestAbilityLetterFrom pattern
   remainWords = []
   @currentBucket.each {|bucketWord| remainWords += [bucketWord] if pattern.match(bucketWord)}
   @currentBucket = remainWords
-  p remainWords if remainWords.length <10
   dict = statisticLetter remainWords
   @missingWord.each {|letter| dict.delete letter}
   getHighestLetterFrom dict
