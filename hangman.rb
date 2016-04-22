@@ -14,6 +14,9 @@ require 'json'
 @data = :data
 @message = :message
 @word = "word"
+@numberOfWordsToGuess = "numberOfWordsToGuess"
+@numberOfGuessAllowedForEachWord = "numberOfGuessAllowedForEachWord"
+
 @firstGuessLetterTable = [
 'aaeseeeeeeeeeiiiieiieeeoe',
 'oeaesssssiiiieeeeieoitola',
@@ -41,8 +44,8 @@ def postData data
     res = JSON.parse RestClient.post(@url,data.to_json,:content_type => :json,:accept => :json)
   end
   res.keys.each {|key| res[(key.to_sym rescue key) || key] = res.delete key}
-  p res[@data]["totalWordCount"]
-  res
+  p res[@data]["totalWordCount"]#wired things, if delete it I will couldn't get the correct
+   res
 end
 
 def progStartGame
@@ -74,7 +77,6 @@ def guessWord
   res = progNextWord
   res[@word].delete! "\n"
   res[@word].delete! "\r"
-  print res[@word].length
   @currentBucket = @wordBucket[res[@word].length]
   i = 0
   word = nil
@@ -126,7 +128,6 @@ def statisticLetter wordsList
   dict = Hash.new { |hash, key| hash[key] = 0 }
   @alphabet.each_char { |chr| dict[chr] = 0 }
   wordsList.each {|word| word.chars.uniq.each { |chr| dict[chr] += 1}}
-  # p dict,@missingWord
   dict
 end
 
@@ -140,6 +141,8 @@ end
 def getSortListFrom dict
   @currentLetterOrder = dict.to_a.sort {|x,y| y[1]<=>x[1]}
 end
+
+#----------------------------------------------------
 
 def wordsBucketCreate
   @wordBucket = Array.new(30,[])
@@ -155,8 +158,8 @@ end
 def main()
   wordsBucketCreate
   res = progStartGame()
-  @WordsNum = res["numberOfWordsToGuess"]
-  @GuessNum = res["numberOfGuessAllowedForEachWord"]
+  @WordsNum = res[@numberOfWordsToGuess]
+  @GuessNum = res[@numberOfGuessAllowedForEachWord]
   @WordsNum.times {|i|
     print "the ",i,"th guess\n"
     guessWord()
@@ -165,4 +168,5 @@ def main()
   p 'submit?(Y/n)'
   puts progSubmit(),'----' if ['y','Y'].include? gets.chomp
 end
+
 main
