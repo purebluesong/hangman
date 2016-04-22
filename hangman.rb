@@ -5,7 +5,7 @@ require 'json'
 @playerID = 'purebluesong@gmail.com'
 @wordFileName = 'words.txt'
 
-@alphabet = 'abcdefghihjklmnopqrstuvwxyz'
+@alphabet = 'esiarntolcdupmghbyfvkwzxqj'
 @startAction = 'startGame'
 @nextWordAction = 'nextWord'
 @guessWordAction = 'guessWord'
@@ -15,16 +15,16 @@ require 'json'
 @message = :message
 @word = "word"
 @firstGuessLetterTable = [
-  'aaaeeeeeeeeeiiiiiiiiieei',
-  'zseasssssiiieeeenetaaoia',
-  'yoosaariissnnnntsnattrat',
-  'xmiorrirrnnssssnetnnocss',
-  'wntloiaaaaattttotseenatn',
-  'vepiionnnrtaaaosoooletre',
-  'ucstllttttrrooaaaarolnnr',
-  'tiurtnlooooorrrrrlssrllm',
-  'shnnntolllllllllcrlrcscl',
-  'rtrdddddcccccccclcccsiph',
+'aaeseeeeeeeeeiiiieiieeeoe',
+'oeaesssssiiiieeeeieoitola',
+'eosaaaiiisssssssssoeoiret',
+'iiooriaaannnnnnnoosttoitl',
+'mtirirrrratttttttttssslic',
+'hslionnnntaaoooonnnnnnthr',
+'uurlloottrroaaaaarrarrcan',
+'npttnttoooorrrrrraaralapi',
+'srnntllllllllllllllllahnh',
+'ynuddddcccccccccccccccpmy',
 ]
 @sessionID = nil
 @WordsNum = nil
@@ -72,29 +72,27 @@ end
 @wrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
 def guessWord
   res = progNextWord
-  @currentBucket = @wordBucket[res[@word].length+2]
+  res[@word].delete! "\n"
+  res[@word].delete! "\r"
+  print res[@word].length
+  @currentBucket = @wordBucket[res[@word].length]
   i = 0
   word = nil
   @missingWord.clear
-  @missingWord += ["\r","\n"]
-  while i< @GuessNum
+  begin
     letter = @firstGuessLetterTable[i][res[@word].length-1]
     i,word = guessOnce letter
-    break if (word.delete '*') != ''
-    print 'guess',i,'times wrong first letter ',word,"\n"
-  end
+  end while (word.delete '*') == '' and i< @GuessNum
 
-  while i<@GuessNum
+  while i<@GuessNum and word.include? '*'
     i,word = guessOnce highestRemainLetterOf word
-    break if !word.include? '*'
-    print 'guess',i,'wrong times ',word,"\n"
   end
 end
 
 def guessOnce letter
-  p 'guess '+letter
   @missingWord += [letter]
   res = progGuessWord letter.upcase
+  print 'guess',res[@wrongGuessNumberStr],'wrong times ',res[@word],' letter:',letter,"\n"
   [res[@wrongGuessNumberStr],res[@word]]
 end
 
@@ -103,7 +101,8 @@ def highestRemainLetterOf word
   if word==@lastWord
     getALetterFromHighestList
   else
-    getHighestAbilityLetterFrom @lastWord = word
+    @lastWord = word = word.gsub('*','.').downcase
+    getHighestAbilityLetterFrom Regexp.compile(word)
   end
 end
 
@@ -113,23 +112,21 @@ def getALetterFromHighestList
   letter
 end
 
-def getHighestAbilityLetterFrom word
+def getHighestAbilityLetterFrom pattern
   remainWords = []
-  pattern = Regexp.compile(word.gsub('*','.').downcase)
   @currentBucket.each {|bucketWord| remainWords += [bucketWord] if pattern.match(bucketWord)}
+  @currentBucket = remainWords
+  p remainWords if remainWords.length <10
   dict = statisticLetter remainWords
   @missingWord.each {|letter| dict.delete letter}
-  if !dict.nil?
-    getHighestLetterFrom dict
-  else
-    print @missingWord
-  end
+  getHighestLetterFrom dict
 end
 
 def statisticLetter wordsList
   dict = Hash.new { |hash, key| hash[key] = 0 }
   @alphabet.each_char { |chr| dict[chr] = 0 }
   wordsList.each {|word| word.chars.uniq.each { |chr| dict[chr] += 1}}
+  # p dict,@missingWord
   dict
 end
 
@@ -142,17 +139,14 @@ end
 @currentLetterOrder = nil
 def getSortListFrom dict
   @currentLetterOrder = dict.to_a.sort {|x,y| y[1]<=>x[1]}
-  if !@currentLetterOrder.nil?
-    @currentLetterOrder
-  else
-    print dict
-  end
 end
 
 def wordsBucketCreate
   @wordBucket = Array.new(30,[])
   file  = File.open(@wordFileName)
   file.each {|line|
+    line.delete! "\n"
+    line.delete! "\r"
     @wordBucket[line.length] += [line]
   }
   puts 'words bucket init over'
@@ -169,7 +163,6 @@ def main()
   }
   puts progGetResult()
   p 'submit?(Y/n)'
-  puts progSubmit() if ['y','Y',"Y","y"].include? a=gets else a
+  puts progSubmit(),'----' if ['y','Y'].include? gets.chomp
 end
-
 main
