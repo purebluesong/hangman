@@ -165,7 +165,7 @@ def main()
   @WordsNum = res[@numberOfWordsToGuess]
   @GuessNum = res[@numberOfGuessAllowedForEachWord]
   @WordsNum.times {|i|
-    print "======================the ",i,"th guess=================\n"
+    print "======================the ",i+1,"th guess=================\n"
     guessWord()
   }
   open("newwords.txt","at") {|f| @newwords.each {|word| f.puts word+"\n"}}
