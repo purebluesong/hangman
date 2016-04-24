@@ -93,7 +93,7 @@ def guessWord
     i,word = guessOnce highestRemainLetterOf word
   end
 
-  @newwords += [word] if !word.include? '*' and @currentBucket == []
+  @newwords += [word+'    '+@missingWord.to_s] if @currentBucket == []
 end
 
 def guessOnce letter
