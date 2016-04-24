@@ -29,13 +29,13 @@ for i in range(10):
     for line in lines:
         newlines[i] +=line[i]
 for line in newlines:
-    print line[2:]
+    print '\''+line[2:]+'\','
 allletters = sorted(anotherDict,key=lambda x:anotherDict[x])
 line = ''
 allletters.reverse()
 for d in allletters:
     line  += d
-print line
+# print line
     # print wordsDict,word
     # raw_input()
 # s = "\n".join(wordlist)
