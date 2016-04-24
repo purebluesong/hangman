@@ -47,7 +47,7 @@ def postData data
     res = JSON.parse RestClient.post(@url,data.to_json,:content_type => :json,:accept => :json)
   end
   res.keys.each {|key| res[(key.to_sym rescue key) || key] = res.delete key}
-  print res[@data]["totalWordCount"]+" "#wired things, if delete it I will couldn't get the correct res
+  print res[@data]["totalWordCount"]," "#wired things, if delete it I will couldn't get the correct res
   res
 end
 
@@ -165,7 +165,7 @@ def main()
   @WordsNum = res[@numberOfWordsToGuess]
   @GuessNum = res[@numberOfGuessAllowedForEachWord]
   @WordsNum.times {|i|
-    print "the ",i,"th guess\n"
+    print "======================the ",i,"th guess=================\n"
     guessWord()
   }
   open("newwords.txt","at") {|f| @newwords.each {|word| f.puts word+"\n"}}
