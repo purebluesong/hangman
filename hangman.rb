@@ -37,6 +37,7 @@ require 'json'
 @wordBucket = []
 @currentBucket = nil
 @newwords = []
+@newwordsBucket = []
 
 
 # ----------------------------the web process layer-----------------------------------
@@ -47,7 +48,7 @@ def postData data
     res = JSON.parse RestClient.post(@url,data.to_json,:content_type => :json,:accept => :json)
   end
   res.keys.each {|key| res[(key.to_sym rescue key) || key] = res.delete key}
-  print res[@data]["totalWordCount"]," "#wired things, if delete it I will couldn't get the correct res
+  res[@data]#  "#wired things, if delete it I will couldn't get the correct res
   res
 end
 
@@ -92,14 +93,15 @@ def guessWord
   while i<@GuessNum and word.include? '*'
     i,word = guessOnce highestRemainLetterOf word
   end
-
-  @newwords += [word+'    '+@missingWord.to_s] if @currentBucket == []
+  missing = ""
+  @missingWord.each {|letter| missing+=letter}
+  @newwords += [word + ' ' + missing] if @currentBucket == []
 end
 
 def guessOnce letter
   @missingWord += [letter]
   res = progGuessWord letter.upcase
-  print 'guess',res[@wrongGuessNumberStr],'wrong times ',res[@word],' letter:',letter,"\n"
+  print 'guess ',res[@wrongGuessNumberStr],' wrong times ',res[@word],' letter:',letter,"\n"
   [res[@wrongGuessNumberStr],res[@word]]
 end
 
@@ -109,7 +111,7 @@ def highestRemainLetterOf word
     getALetterFromHighestList
   else
     @lastWord = word = word.gsub('*','.').downcase
-    getHighestAbilityLetterFrom Regexp.compile(word)
+    getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
   end
 end
 
@@ -123,6 +125,15 @@ def getHighestAbilityLetterFrom pattern
   remainWords = []
   @currentBucket.each {|bucketWord| remainWords += [bucketWord] if pattern.match(bucketWord)}
   @currentBucket = remainWords
+  if remainWords == []
+    @newwordsBucket.each {|bucketWord|
+      word,missingWord = bucketWord.split(' ')
+      if pattern.match(word)
+        remainWords += [word]
+        @missingWord = missingWord.split ''
+      end
+    }
+  end
   dict = statisticLetter remainWords
   @missingWord.each {|letter| dict.delete letter}
   getHighestLetterFrom dict
@@ -159,8 +170,9 @@ def wordsBucketCreate
   puts 'words bucket init over'
 end
 
-def main()
-  wordsBucketCreate
+@score = 1360
+def gameing()
+  open("newwords.txt","rt") {|f| @newwordsBucket=f.read.split("\n")}
   res = progStartGame()
   @WordsNum = res[@numberOfWordsToGuess]
   @GuessNum = res[@numberOfGuessAllowedForEachWord]
@@ -168,10 +180,16 @@ def main()
     print "======================the ",i+1,"th guess=================\n"
     guessWord()
   }
-  open("newwords.txt","at") {|f| @newwords.each {|word| f.puts word+"\n"}}
-  puts progGetResult()
-  p 'submit?(Y/n)'
-  puts progSubmit(),'----' if ['y','Y'].include? gets.chomp
+  open("newwords.txt","at") {|f| @newwords.each {|word| f.puts word.downcase+"\n"}}
+  res = progGetResult()
+  puts res
+  if !res[@data].nil? and res[@data]["score"] > @score
+    print 'submit--'
+    puts progSubmit()
+  else
+    puts "a low score--"
+  end
 end
 
-main
+wordsBucketCreate
+loop{gameing}
