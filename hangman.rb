@@ -1,6 +1,6 @@
 require 'restclient'
 require 'json'
-
+load 'mytool.rb'
 
 #---------------------------config variable------------------------
 @url = 'https://strikingly-hangman.herokuapp.com/game/on'
@@ -130,7 +130,8 @@ def getHighestAbilityLetterFrom pattern
       word,missingWord = bucketWord.split(' ')
       if pattern.match(word)
         remainWords += [word]
-        @missingWord = missingWord.split ''
+        @missingWord = missingWord.split '' if !missingWord.nil?
+        break if !word.include? '*'
       end
     }
   end
@@ -167,7 +168,7 @@ def wordsBucketCreate
     line.delete! "\r"
     @wordBucket[line.length] += [line]
   }
-  puts 'words bucket init over'
+  puts 'words bucket init ove r'
 end
 
 @score = 1360
@@ -181,6 +182,7 @@ def gameing()
     guessWord()
   }
   open("newwords.txt","at") {|f| @newwords.each {|word| f.puts word.downcase+"\n"}}
+  clearNewWords
   res = progGetResult()
   puts res
   if !res[@data].nil? and res[@data]["score"] > @score
