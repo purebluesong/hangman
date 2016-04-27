@@ -61,19 +61,15 @@ end
 @lastWord = nil
 def highestRemainLetterOf word
   if word==@lastWord
-    getALetterFromHighestList
+    @currentLetterOrder.pop[0]
   else
     @lastWord = word = word.gsub('*','.').downcase
     getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
   end
 end
 
-def getALetterFromHighestList
-  letter = @currentLetterOrder[0][0]
-  @currentLetterOrder.delete_at 0
-  letter
-end
 
+@currentLetterOrder = nil
 def getHighestAbilityLetterFrom pattern
   remainWords = []
   @currentBucket.each {|bucketWord| remainWords += [bucketWord] if pattern.match(bucketWord)}
@@ -83,37 +79,30 @@ def getHighestAbilityLetterFrom pattern
       word,missingWord = bucketWord.split(' ')
       if pattern.match(word)
         remainWords += [word]
-        @missingWord = missingWord.split '' if !missingWord.nil?
         break if !word.include? '*'
+        @missingWord = missingWord.split '' if !missingWord.nil?
       end
     }
   end
   dict = statisticLetter remainWords
   @missingWord.each {|letter| dict.delete letter}
-  letter = (getSortListFrom dict)[0][0]
-  getHighestLetterFrom dict
+  @currentLetterOrder = getSortListFrom dict
+  @currentLetterOrder.each {|word| print word[0],word[1],' ' if word[1]>0}
+  puts ''
+  @currentLetterOrder.pop[0]
 end
 
 @alphabet = 'esiarntolcdupmghbyfvkwzxqj'
 def statisticLetter wordsList
-  dict = Hash.new { |hash, key| hash[key] = 0 }
-  @alphabet.each_char { |chr| dict[chr] = 1 }
+  dict = {}
+  @alphabet.each_char { |chr| dict[chr] = 0 }
   wordsList.each {|word| word.chars.uniq.each { |chr| dict[chr] += 1}}
   dict
 end
 
-def getHighestLetterFrom dict
-  letter = (getSortListFrom dict)[0][0]
-  @currentLetterOrder.delete_at 0
-  @currentLetterOrder.each {|letter| print letter[0]}
-  letter
-end
-
-@currentLetterOrder = nil
 def getSortListFrom dict
-  @currentLetterOrder = dict.to_a.sort {|x,y| y[1]<=>x[1]}
+  dict.to_a.sort {|x,y| x[1]<=>y[1]}
 end
-
 #----------------------------------------------------
 
 def wordsBucketCreate
