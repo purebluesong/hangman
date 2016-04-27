@@ -1,23 +1,14 @@
-require 'restclient'
-require 'json'
 load 'mytool.rb'
+load 'webLayer_hangman.rb'
 
 #---------------------------config variable------------------------
-@url = 'https://strikingly-hangman.herokuapp.com/game/on'
-@playerID = 'purebluesong@gmail.com'
 @wordFileName = 'words.txt'
-
-@alphabet = 'esiarntolcdupmghbyfvkwzxqj'
-@startAction = 'startGame'
-@nextWordAction = 'nextWord'
-@guessWordAction = 'guessWord'
-@getResultAction = 'getResult'
-@submitAction = 'submitResult'
 @data = :data
 @message = :message
 @word = "word"
 @numberOfWordsToGuess = "numberOfWordsToGuess"
 @numberOfGuessAllowedForEachWord = "numberOfGuessAllowedForEachWord"
+@wrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
 
 @firstGuessLetterTable = [
   'aaeseeeeeeeeeiiiieiieeeoe',
@@ -31,52 +22,14 @@ load 'mytool.rb'
   'srnntllllllllllllllllahnh',
   'ynuddddcccccccccccccccpmy',
 ]
-@sessionID = nil
 @WordsNum = nil
 @GuessNum = nil
 @wordBucket = []
 @currentBucket = nil
 @newwords = []
 @newwordsBucket = []
-
-
-# ----------------------------the web process layer-----------------------------------
-def postData data
-  begin
-    res = JSON.parse RestClient.post(@url,data.to_json,:content_type => :json,:accept => :json)
-  rescue
-    res = JSON.parse RestClient.post(@url,data.to_json,:content_type => :json,:accept => :json)
-  end
-  res.keys.each {|key| res[(key.to_sym rescue key) || key] = res.delete key}
-  res[@data]#  "#wired things, if delete it I will couldn't get the correct res
-  res
-end
-
-def progStartGame
-  res = postData({:playerID=>@playerID, :action=>@startAction})
-  puts res[@message] if res.key? @message
-  @sessionID = res[:sessionId]
-  res[@data]
-end
-
-def progNextWord
-  postData({:sessionID=>@sessionID, :action=>@nextWordAction})[@data]
-end
-
-def progGuessWord word
-  postData({:sessionID=>@sessionID, :action=>@guessWordAction, :guess=>word})[@data]
-end
-
-def progGetResult
-  postData({:sessionID=>@sessionID, :action=>@getResultAction})[@data]
-end
-
-def progSubmit
-  postData({:sessionID=>@sessionID, :action=>@submitAction})[@data]
-end
-# -----------------------------------the core algo--------------------------------------
 @missingWord = []
-@wrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
+# -----------------------------------the core algo--------------------------------------
 def guessWord
   res = progNextWord
   res[@word].delete! "\n"
@@ -137,12 +90,14 @@ def getHighestAbilityLetterFrom pattern
   end
   dict = statisticLetter remainWords
   @missingWord.each {|letter| dict.delete letter}
+  letter = (getSortListFrom dict)[0][0]
   getHighestLetterFrom dict
 end
 
+@alphabet = 'esiarntolcdupmghbyfvkwzxqj'
 def statisticLetter wordsList
   dict = Hash.new { |hash, key| hash[key] = 0 }
-  @alphabet.each_char { |chr| dict[chr] = 0 }
+  @alphabet.each_char { |chr| dict[chr] = 1 }
   wordsList.each {|word| word.chars.uniq.each { |chr| dict[chr] += 1}}
   dict
 end
@@ -150,6 +105,7 @@ end
 def getHighestLetterFrom dict
   letter = (getSortListFrom dict)[0][0]
   @currentLetterOrder.delete_at 0
+  @currentLetterOrder.each {|letter| print letter[0]}
   letter
 end
 
@@ -168,7 +124,7 @@ def wordsBucketCreate
     line.delete! "\r"
     @wordBucket[line.length] += [line]
   }
-  puts 'words bucket init ove r'
+  puts 'words bucket init over'
 end
 
 @score = 1360
@@ -193,5 +149,7 @@ def gameing()
   end
 end
 
-wordsBucketCreate
-loop{gameing}
+if __FILE__ == $0
+  wordsBucketCreate
+  loop{gameing}
+end
