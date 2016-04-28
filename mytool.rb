@@ -1,29 +1,37 @@
 #!/usr/bin/env ruby
+@newwordsFileName = "newwords.txt"
 def clearNewWords
-  @alphabet = "abcdefghijklmnopqrstuvwxyz"
-  @somethingfuck =[]
-  @somethingfun = []
-  open("newwords.txt","rt") {|f|
-    f.read.split("\n").each {|line|
+  somethingfuck =[]
+  somethingfun = []
+  open(@newwordsFileName,"rt") {|f|
+    f.readlines.each {|line|
       if line.include? '*'
-        @somethingfun += [line]
+        somethingfun += [line.split(' ')[0]+" "+(line.split(' ')[1].delete '*')]
       else
-        @somethingfuck += [line.split(" ")[0]]
+        somethingfuck += [line.split(" ")[0]]
       end
     }
   }
-  @somethingfuck.uniq!
-  @somethingfuck.sort!
-  @somethingfuck.sort_by! {|x| x.size}
-  @somethingfuck.each {|word| puts word.downcase}
+  somethingfuck.uniq!
+  somethingfuck.sort_by! {|x| x.size}
 
-  @somethingfun.uniq!
-  @somethingfun.sort!
-  @somethingfun.sort_by! {|x| x.size}
-  @somethingfun.each {|word| puts word.downcase,word.split(" ")[1].length}
+  somethingfun.uniq!
+  somethingfun.sort_by! {|x| x.split(' ')[0].size}
 
-  open("newwords.txt","wt") {|f|
-    @somethingfuck.each {|word| f.write word+"\n"}
-    @somethingfun.each {|word| f.write word+"\n"}
+  open(@newwordsFileName,"wt") {|f|
+    somethingfuck.each {|word| f.write word+"\n"}
+    somethingfun.each {|word| f.write word+"\n"}
   }
+end
+
+def readNewWords
+  open(@newwordsFileName,"rt").readlines
+end
+
+def appendNewWords words
+  open(@newwordsFileName,"at").puts words
+end
+
+if __FILE__ == $0
+  clearNewWords
 end

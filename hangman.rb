@@ -60,16 +60,14 @@ end
 
 @lastWord = nil
 def highestRemainLetterOf word
-  if word==@lastWord
-    @currentLetterOrder.pop[0]
-  else
+  if word!=@lastWord
     @lastWord = word = word.gsub('*','.').downcase
-    getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
+    @currentLetterOrder = getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
+    @currentLetterOrder.each {|word| print word[0],word[1],' ' if word[1]>0}
   end
+  @currentLetterOrder.pop[0]
 end
 
-
-@currentLetterOrder = nil
 def getHighestAbilityLetterFrom pattern
   remainWords = []
   @currentBucket.each {|bucketWord| remainWords += [bucketWord] if pattern.match(bucketWord)}
@@ -86,17 +84,14 @@ def getHighestAbilityLetterFrom pattern
   end
   dict = statisticLetter remainWords
   @missingWord.each {|letter| dict.delete letter}
-  @currentLetterOrder = getSortListFrom dict
-  @currentLetterOrder.each {|word| print word[0],word[1],' ' if word[1]>0}
-  puts ''
-  @currentLetterOrder.pop[0]
+  getSortListFrom dict
 end
 
 @alphabet = 'esiarntolcdupmghbyfvkwzxqj'
 def statisticLetter wordsList
   dict = {}
   @alphabet.each_char { |chr| dict[chr] = 0 }
-  wordsList.each {|word| word.chars.uniq.each { |chr| dict[chr] += 1}}
+  wordsList.each {|word| word.delete('*').chars.uniq.each { |chr| dict[chr] += 1}}
   dict
 end
 
@@ -118,7 +113,7 @@ end
 
 @score = 1360
 def gameing()
-  open("newwords.txt","rt") {|f| @newwordsBucket=f.read.split("\n")}
+  @newwordsBucket = readNewWords
   res = progStartGame()
   @WordsNum = res[@numberOfWordsToGuess]
   @GuessNum = res[@numberOfGuessAllowedForEachWord]
@@ -126,12 +121,11 @@ def gameing()
     print "======================the ",i+1,"th guess=================\n"
     guessWord()
   }
-  open("newwords.txt","at") {|f| @newwords.each {|word| f.puts word.downcase+"\n"}}
+  appendNewWords @newwords.join "\n "
   clearNewWords
-  res = progGetResult()
-  puts res
+  puts res = progGetResult()
   if !res[@data].nil? and res[@data]["score"] > @score
-    print 'submit--'
+    @score = res[@data]["score"]
     puts progSubmit()
   else
     puts "a low score--"
