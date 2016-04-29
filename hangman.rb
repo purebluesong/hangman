@@ -35,23 +35,21 @@ def guessWord
   res[@word].delete! "\n"
   res[@word].delete! "\r"
   @currentBucket = @wordBucket[res[@word].length]
-  i = 0
-  word = nil
   @missingWord.clear
+  i = 0
   begin
-    letter = @firstGuessLetterTable[i][res[@word].length-1]
-    i,word = guessOnce letter
+    i,word = guessLetter @firstGuessLetterTable[i][res[@word].length-1]
   end while (word.delete '*') == '' and i< @GuessNum
 
   while i<@GuessNum and word.include? '*'
-    i,word = guessOnce highestRemainLetterOf word
+    i,word = guessLetter highestRemainLetterOf word
   end
   missing = ""
-  @missingWord.each {|letter| missing+=letter}
+  @missingWord.each {|letter| missing += letter}
   @newwords += [word + ' ' + missing] if @currentBucket == []
 end
 
-def guessOnce letter
+def guessLetter letter
   @missingWord += [letter]
   res = progGuessWord letter.upcase
   print 'guess ',res[@wrongGuessNumberStr],' wrong times ',res[@word],' letter:',letter,"\n"
@@ -100,19 +98,17 @@ def getSortListFrom dict
 end
 #----------------------------------------------------
 
-def wordsBucketCreate
+def createWordsBucket
   @wordBucket = Array.new(30,[])
-  file  = File.open(@wordFileName)
-  file.each {|line|
-    line.delete! "\n"
-    line.delete! "\r"
+  open(@wordFileName,"rt").readlines.each {|line|
+    line.chomp!
     @wordBucket[line.length] += [line]
   }
   puts 'words bucket init over'
 end
 
 @score = 1360
-def gameing()
+def play()
   @newwordsBucket = readNewWords
   res = progStartGame()
   @WordsNum = res[@numberOfWordsToGuess]
@@ -121,7 +117,7 @@ def gameing()
     print "======================the ",i+1,"th guess=================\n"
     guessWord()
   }
-  appendNewWords @newwords.join "\n "
+  appendNewWords @newwords.join "\n"
   clearNewWords
   puts res = progGetResult()
   if !res[@data].nil? and res[@data]["score"] > @score
@@ -133,6 +129,6 @@ def gameing()
 end
 
 if __FILE__ == $0
-  wordsBucketCreate
-  loop{gameing}
+  createWordsBucket
+  loop{play}
 end

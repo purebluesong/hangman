@@ -29,7 +29,11 @@ def readNewWords
 end
 
 def appendNewWords words
-  open(@newwordsFileName,"at").puts words
+  open(@newwordsFileName,"at").puts words.downcase
+end
+
+def appendRecords record
+  open("records.txt","at").puts record.to_s
 end
 
 if __FILE__ == $0
