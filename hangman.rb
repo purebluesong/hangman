@@ -11,42 +11,38 @@ load 'webLayer_hangman.rb'
 @wrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
 
 @firstGuessLetterTable = [
-  'aaeseeeeeeeeeiiiieiieeeoe',
-  'oeaesssssiiiieeeeieoitola',
-  'eosaaaiiisssssssssoeoiret',
-  'iiooriaaannnnnnnoosttoitl',
-  'mtirirrrratttttttttssslic',
-  'hslionnnntaaoooonnnnnnthr',
-  'uurlloottrroaaaaarrarrcan',
-  'npttnttoooorrrrrraaralapi',
-  'srnntllllllllllllllllahnh',
-  'ynuddddcccccccccccccccpmy',
+  'aaaseeeeeeeiiiiiiiiiteeeeeee',
+  'oeeeaiiiiiieeeeeeeeeesssssss',
+  'eooaiaaaoooooarrassssiiiiiii',
+  'iiioooooaaaasssssaaaiaaaaaaa',
+  'uuuiuuuuusrsaraarrrrarrrrrrr',
+  'myyusssssrsrrnnnnnnnrnnnnnnn',
+  'shsyyrrrrnnnntttttttnttttttt',
+  'bsrtrnnnnttttooooooooooooooo',
+  'rrtrnttttlllllllllllllllllll',
+  'ncnntllllccccccccccccccccccc',
 ]
-@WordsNum = nil
-@GuessNum = nil
 @wordBucket = []
-@currentBucket = nil
 @newwords = []
 @newwordsBucket = []
 @missingWord = []
 # -----------------------------------the core algo--------------------------------------
 def guessWord
   res = progNextWord
-  res[@word].delete! "\n"
-  res[@word].delete! "\r"
+  res[@word].chomp!
   @currentBucket = @wordBucket[res[@word].length]
   @missingWord.clear
-  i = 0
+  wrongGuessNum = 0
+  word = ''
   begin
-    i,word = guessLetter @firstGuessLetterTable[i][res[@word].length-1]
-  end while (word.delete '*') == '' and i< @GuessNum
+    wrongGuessNum,word = guessLetter @firstGuessLetterTable[wrongGuessNum][res[@word].length-1]
+  end while (word.delete '*') == '' and wrongGuessNum< @GuessNum
 
-  while i<@GuessNum and word.include? '*'
-    i,word = guessLetter highestRemainLetterOf word
+  while wrongGuessNum<@GuessNum and word.include? '*'
+    wrongGuessNum,word = guessLetter highestRemainLetterOf word
   end
-  missing = ""
-  @missingWord.each {|letter| missing += letter}
-  @newwords += [word + ' ' + missing] if @currentBucket == []
+
+  @newwords += [word + ' ' + @missingWord.join('')] if @currentBucket == []
 end
 
 def guessLetter letter
@@ -60,8 +56,8 @@ end
 def highestRemainLetterOf word
   if word!=@lastWord
     @lastWord = word = word.gsub('*','.').downcase
+    @incorrectWord = @missingWord-word.chars
     @currentLetterOrder = getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
-    @currentLetterOrder.each {|word| print word[0],word[1],' ' if word[1]>0}
   end
   @currentLetterOrder.pop[0]
 end
@@ -69,6 +65,7 @@ end
 def getHighestAbilityLetterFrom pattern
   remainWords = []
   @currentBucket.each {|bucketWord| remainWords += [bucketWord] if pattern.match(bucketWord)}
+  remainWords.each{|word| remainWords.delete word if (word.chars-@incorrectWord)!=word.chars}
   @currentBucket = remainWords
   if remainWords == []
     @newwordsBucket.each {|bucketWord|
@@ -119,7 +116,7 @@ def play()
   }
   appendNewWords @newwords.join "\n"
   clearNewWords
-  puts res = progGetResult()
+  appendRecords res = progGetResult()
   if !res[@data].nil? and res[@data]["score"] > @score
     @score = res[@data]["score"]
     puts progSubmit()
