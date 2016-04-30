@@ -37,19 +37,27 @@ def guessWord
   begin
     wrongGuessNum,word = guessLetter @firstGuessLetterTable[wrongGuessNum][res[@word].length-1]
   end while (word.delete '*') == '' and wrongGuessNum< @GuessNum
-
+  puts '_'*50
   while wrongGuessNum<@GuessNum and word.include? '*'
     wrongGuessNum,word = guessLetter highestRemainLetterOf word
   end
 
-  @newwords += [word + ' ' + @missingWord.join('')] if @currentBucket == []
+  @newwords += [word] if @currentBucket == [] and !word.include? '*'
 end
 
+@lastLetter = nil
 def guessLetter letter
   @missingWord += [letter]
-  res = progGuessWord letter.upcase
-  print 'guess ',res[@wrongGuessNumberStr],' wrong times ',res[@word],' letter:',letter,"\n"
-  [res[@wrongGuessNumberStr],res[@word]]
+  if @lastLetter != letter
+    res = progGuessWord letter.upcase
+    print 'guess ',res[@wrongGuessNumberStr],' wrong times ',res[@word],' letter:',letter,"\n"
+    @lastLetter = letter
+    [res[@wrongGuessNumberStr],res[@word]]
+  else
+    puts @missingWord,@currentBucket
+    gets
+    exit
+  end
 end
 
 @lastWord = nil
