@@ -54,7 +54,7 @@ def guessLetter letter
     @lastLetter = letter
     [res[@wrongGuessNumberStr],res[@word]]
   else
-    puts @missingWord,@currentBucket
+    puts @missingWord,@currentBucket,letter
     gets
     exit
   end
@@ -93,7 +93,7 @@ end
 @alphabet = 'esiarntolcdupmghbyfvkwzxqj'
 def statisticLetter wordsList
   dict = {}
-  @alphabet.each_char { |chr| dict[chr] = 0 }
+  @alphabet.chars.shuffle.each { |chr| dict[chr] = 0 }
   wordsList.each {|word| word.delete('*').chars.uniq.each { |chr| dict[chr] += 1}}
   dict
 end
