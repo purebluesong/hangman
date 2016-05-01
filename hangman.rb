@@ -37,27 +37,21 @@ def guessWord
   begin
     wrongGuessNum,word = guessLetter @firstGuessLetterTable[wrongGuessNum][res[@word].length-1]
   end while (word.delete '*') == '' and wrongGuessNum< @GuessNum
-  puts '_'*50
+  puts '-'*50
   while wrongGuessNum<@GuessNum and word.include? '*'
     wrongGuessNum,word = guessLetter highestRemainLetterOf word
   end
 
-  @newwords += [word] if @currentBucket == [] and !word.include? '*'
+  @newwords += [word] if @currentBucket == [] and word.length>0 and !word.include? '*'
 end
 
-@lastLetter = nil
 def guessLetter letter
   @missingWord += [letter]
-  if @lastLetter != letter
-    res = progGuessWord letter.upcase
-    print 'guess ',res[@wrongGuessNumberStr],' wrong times ',res[@word],' letter:',letter,"\n"
-    @lastLetter = letter
-    [res[@wrongGuessNumberStr],res[@word]]
-  else
-    puts @missingWord,@currentBucket,letter
-    gets
-    exit
-  end
+  res = progGuessWord letter.upcase
+  print 'guess ',res[@wrongGuessNumberStr],' wrong times ',res[@word],' letter:',letter,"\n"
+  # print @missingWord.join(''),' ',@currentBucket.length,' ',letter,"\n"
+  # print @currentLetterOrder.join(''),"\n" if !@currentLetterOrder.nil?
+  [res[@wrongGuessNumberStr],res[@word]]
 end
 
 @lastWord = nil
@@ -119,7 +113,7 @@ def play()
   @WordsNum = res[@numberOfWordsToGuess]
   @GuessNum = res[@numberOfGuessAllowedForEachWord]
   @WordsNum.times {|i|
-    print "======================the ",i+1,"th guess=================\n"
+    print "="*25,"the ",i+1,"th guess","="*25,"\n"
     guessWord()
   }
   appendNewWords @newwords.join "\n"
