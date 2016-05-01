@@ -2,7 +2,7 @@ load 'mytool.rb'
 load 'webLayer_hangman.rb'
 
 #---------------------------config variable------------------------
-@wordFileName = 'words.txt'
+@wordFileName = 'dict/words.txt'
 @data = :data
 @message = :message
 @word = "word"

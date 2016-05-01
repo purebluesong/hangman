@@ -1,4 +1,4 @@
-filename = 'words.txt'
+filename = '../dict/words.txt'
 f = open(filename)
 wordlist = f.read().split('\n')
 # print len(wordlist)

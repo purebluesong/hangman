@@ -87,3 +87,7 @@
 {"totalWordCount"=>80, "correctWordCount"=>75, "totalWrongGuessCount"=>225, "score"=>1275}
 {"totalWordCount"=>80, "correctWordCount"=>72, "totalWrongGuessCount"=>283, "score"=>1157}
 {"totalWordCount"=>80, "correctWordCount"=>73, "totalWrongGuessCount"=>244, "score"=>1216}
+{"totalWordCount"=>80, "correctWordCount"=>74, "totalWrongGuessCount"=>237, "score"=>1243}
+{"totalWordCount"=>80, "correctWordCount"=>76, "totalWrongGuessCount"=>261, "score"=>1259}
+{"totalWordCount"=>80, "correctWordCount"=>72, "totalWrongGuessCount"=>238, "score"=>1202}
+{"totalWordCount"=>80, "correctWordCount"=>76, "totalWrongGuessCount"=>238, "score"=>1282}

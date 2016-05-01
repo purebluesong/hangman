@@ -1,26 +1,15 @@
 #!/usr/bin/env ruby
-@newwordsFileName = "newwords.txt"
+@newwordsFileName = "dict/newwords.txt"
 def clearNewWords
   somethingfuck =[]
-  somethingfun = []
-  open(@newwordsFileName,"rt") {|f|
-    f.readlines.each {|line|
-      if line.include? '*'
-        somethingfun += [line.split(' ')[0]+" "+(line.split(' ')[1].delete '*')]
-      else
-        somethingfuck += [line.split(" ")[0]]
-      end
-    }
+  open(@newwordsFileName,"rt").readlines.each {|line|
+    somethingfuck += [line.chomp]
   }
   somethingfuck.uniq!
   somethingfuck.sort_by! {|x| x.size}
 
-  somethingfun.uniq!
-  somethingfun.sort_by! {|x| x.split(' ')[0].size}
-
   open(@newwordsFileName,"wt") {|f|
-    somethingfuck.each {|word| f.write word+"\n"}
-    somethingfun.each {|word| f.write word+"\n"}
+    somethingfuck.each {|word| f.write word.downcase+"\n"}
   }
 end
 

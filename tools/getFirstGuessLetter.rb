@@ -1,5 +1,5 @@
 @wordBucket = Array.new(30,[])
-open("words.txt","rt").readlines.each {|line|
+open("../dict/words.txt","rt").readlines.each {|line|
   line.chomp!
   @wordBucket[line.length] += [line]
 }
