@@ -54,13 +54,13 @@ def guessLetter letter
   [res[@wrongGuessNumberStr],res[@word]]
 end
 
-@lastWord = nil
+# @lastWord = nil
 def highestRemainLetterOf word
-  if word!=@lastWord
-    @lastWord = word = word.gsub('*','.').downcase
-    @incorrectWord = @missingWord-word.chars
-    @currentLetterOrder = getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
-  end
+  # if word!=@lastWord
+  @lastWord = word = word.gsub('*','.').downcase
+  @incorrectWord = @missingWord-word.chars
+  @currentLetterOrder = getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
+  # end
   @currentLetterOrder.pop[0]
 end
 
