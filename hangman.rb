@@ -2,15 +2,14 @@ load 'mytool.rb'
 load 'webLayer_hangman.rb'
 
 #---------------------------config variable------------------------
-@wordFileName = 'dict/words.txt'
-@data = :data
-@message = :message
-@word = "word"
-@numberOfWordsToGuess = "numberOfWordsToGuess"
-@numberOfGuessAllowedForEachWord = "numberOfGuessAllowedForEachWord"
-@wrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
+WordFileName = 'dict/words.txt'
+Word = "word"
+NumberOfWordsToGuess = "numberOfWordsToGuess"
+NumberOfGuessAllowedForEachWord = "numberOfGuessAllowedForEachWord"
+WrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
+TotalWordCount = "totalWordCount"
 
-@firstGuessLetterTable = [
+FirstGuessLetterTable = [
   'aaaseeeeeeeiiiiiiiiiteeeeeee',
   'oeeeaiiiiiieeeeeeeeeesssssss',
   'eooaiaaaoooooarrassssiiiiiii',
@@ -22,20 +21,54 @@ load 'webLayer_hangman.rb'
   'rrtrnttttlllllllllllllllllll',
   'ncnntllllccccccccccccccccccc',
 ]
+# -----------------------------------the core algo--------------------------------------
 @wordBucket = []
 @newwords = []
 @newwordsBucket = []
 @missingWord = []
-# -----------------------------------the core algo--------------------------------------
+
+def createWordsBucket
+  @wordBucket = Array.new(30,[])
+  open(WordFileName,"rt").readlines.each {|line|
+    line.chomp!
+    @wordBucket[line.length] += [line]
+  }
+  puts 'words bucket init over'
+end
+
+@score = 1360
+def play()
+  @newwordsBucket = readNewWords
+  res = progStartGame()
+  wordsNum = res[NumberOfWordsToGuess]
+  @GuessNum = res[NumberOfGuessAllowedForEachWord]
+  wordCount = 0
+  begin
+    print "="*25,"the ",wordCount+1,"th guess","="*25,"\n"
+    wordCount = guessWord()
+  end while wordCount < wordsNum
+
+  appendNewWords @newwords.join "\n"
+  clearNewWords
+  appendRecords res = progGetResult()
+
+  if !res[Data].nil? and res[Data]["score"] > @score
+    @score = res[Data]["score"]
+    puts progSubmit()
+  else
+    puts res[Data]["score"]
+  end
+end
+
 def guessWord
   res = progNextWord
-  res[@word].chomp!
-  @currentBucket = @wordBucket[res[@word].length]
+  res[Word].chomp!
+  @currentBucket = @wordBucket[res[Word].length]
   @missingWord.clear
   wrongGuessNum = 0
   word = ''
   begin
-    wrongGuessNum,word = guessLetter @firstGuessLetterTable[wrongGuessNum][res[@word].length-1]
+    wrongGuessNum,word = guessLetter FirstGuessLetterTable[wrongGuessNum][res[Word].length-1]
   end while (word.delete '*') == '' and wrongGuessNum< @GuessNum
   puts '-'*50
   while wrongGuessNum<@GuessNum and word.include? '*'
@@ -43,21 +76,23 @@ def guessWord
   end
 
   @newwords += [word] if @currentBucket == [] and word.length>0 and !word.include? '*'
+  res[TotalWordCount]
 end
 
 def guessLetter letter
   @missingWord += [letter]
   res = progGuessWord letter.upcase
-  print 'guess ',res[@wrongGuessNumberStr],' wrong times ',res[@word],' letter:',letter,"\n"
+  print 'guess ',res[WrongGuessNumberStr],' wrong times ',res[Word],' letter:',letter,"\n"
   # print @missingWord.join(''),' ',@currentBucket.length,' ',letter,"\n"
   # print @currentLetterOrder.join(''),"\n" if !@currentLetterOrder.nil?
-  [res[@wrongGuessNumberStr],res[@word]]
+  [res[WrongGuessNumberStr],res[Word]]
 end
 
 # @lastWord = nil
 def highestRemainLetterOf word
   # if word!=@lastWord
-  @lastWord = word = word.gsub('*','.').downcase
+  # @lastWord =
+  word.gsub!('*','.').downcase!
   @incorrectWord = @missingWord-word.chars
   @currentLetterOrder = getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
   # end
@@ -96,36 +131,6 @@ def getSortListFrom dict
   dict.to_a.sort {|x,y| x[1]<=>y[1]}
 end
 #----------------------------------------------------
-
-def createWordsBucket
-  @wordBucket = Array.new(30,[])
-  open(@wordFileName,"rt").readlines.each {|line|
-    line.chomp!
-    @wordBucket[line.length] += [line]
-  }
-  puts 'words bucket init over'
-end
-
-@score = 1360
-def play()
-  @newwordsBucket = readNewWords
-  res = progStartGame()
-  @WordsNum = res[@numberOfWordsToGuess]
-  @GuessNum = res[@numberOfGuessAllowedForEachWord]
-  @WordsNum.times {|i|
-    print "="*25,"the ",i+1,"th guess","="*25,"\n"
-    guessWord()
-  }
-  appendNewWords @newwords.join "\n"
-  clearNewWords
-  appendRecords res = progGetResult()
-  if !res[@data].nil? and res[@data]["score"] > @score
-    @score = res[@data]["score"]
-    puts progSubmit()
-  else
-    puts "a low score--"
-  end
-end
 
 if __FILE__ == $0
   createWordsBucket
