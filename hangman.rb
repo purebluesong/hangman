@@ -37,14 +37,14 @@ def createWordsBucket
 end
 
 @score = 1363
-def play()
+def play
   @newwordsBucket = readNewWords
   res = progStartGame()
   wordsNum = res[NumberOfWordsToGuess]
   @GuessNum = res[NumberOfGuessAllowedForEachWord]
   wordCount = 0
   while wordCount < wordsNum
-    print "="*25,"the ",wordCount+1,"th guess","="*25,"\n"
+    print "="*25, "the ", wordCount+1, "th guess", "="*25, "\n"
     wordCount = guessWord()
   end
 
@@ -70,13 +70,13 @@ def guessWord
   word = ''
   begin
     wrongGuessNum,word = guessLetter FirstGuessLetterTable[wrongGuessNum][res[Word].length-1]
-  end while (word.delete '*') == '' and wrongGuessNum< @GuessNum
+  end while (word.delete '*') == '' and wrongGuessNum < @GuessNum
   puts '-'*50
-  while wrongGuessNum<@GuessNum and word.include? '*'
+  while wrongGuessNum < @GuessNum and word.include? '*'
     wrongGuessNum,word = guessLetter highestRemainLetterOf word
   end
 
-  @newwords += [word] if @currentBucket == [] and word.length>0 and !word.include? '*'
+  @newwords += [word] if @currentBucket == [] and word.length > 0 and !word.include? '*'
   res[TotalWordCount]
 end
 
@@ -89,39 +89,51 @@ end
 
 def highestRemainLetterOf word
   word.gsub!('*','.').downcase!
-  @incorrectWord = @missingWord-word.chars
+  @incorrectWord = @missingWord - word.chars
   getHighestAbilityLetterFrom(Regexp.compile('^'+word+'$')).pop[0]
 end
 
 def getHighestAbilityLetterFrom pattern
   remainWords = []
-  @currentBucket.each {|bucketWord| remainWords += [bucketWord] if pattern.match(bucketWord)}
-  remainWords.each{|word| remainWords.delete word if (word.chars-@incorrectWord)!=word.chars}
+  @currentBucket.each {|bucketWord|
+    remainWords += [bucketWord] if pattern.match(bucketWord)
+  }
+  remainWords.each{|word|
+    remainWords.delete word if (word.chars - @incorrectWord) != word.chars
+  }
+  remainWords = checkNewWords {|word| pattern.match(word.chomp)} if remainWords == []
   @currentBucket = remainWords
-  if remainWords == []
-    @newwordsBucket.each {|bucketWord|
-      if pattern.match(bucketWord)
-        remainWords += [bucketWord]
-        break
-      end
-    }
-    print remainWords
-  end
+
   dict = statisticLetter remainWords
-  @missingWord.each {|letter| dict.delete letter}
+  @missingWord.each {|letter|
+    dict.delete letter
+  }
   getSortListFrom dict
+end
+
+def checkNewWords
+  @newwordsBucket.each {|bucketWord|
+    if yield(bucketWord)
+      print bucketWord, "---remainWords\n"
+      return [bucketWord.chomp]
+    end
+  puts 'findnone'
+}
+  []
 end
 
 @alphabet = 'esiarntolcdupmghbyfvkwzxqj'
 def statisticLetter wordsList
   dict = {}
   @alphabet.chars.shuffle.each { |chr| dict[chr] = 0 }
-  wordsList.each {|word| word.delete('*').chars.uniq.each { |chr| dict[chr] += 1}}
+  wordsList.each {|word|
+    word.delete('*').chars.uniq.each { |chr| dict[chr] += 1}
+  }
   dict
 end
 
 def getSortListFrom dict
-  dict.to_a.sort {|x,y| x[1]<=>y[1]}
+  dict.to_a.sort {|x, y| x[1]<=>y[1]}
 end
 #----------------------------------------------------
 
