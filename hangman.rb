@@ -50,8 +50,7 @@ def play()
 
   appendNewWords @newwords.join "\n"
   clearNewWords
-  res = progGetResult()
-  appendRecords res
+  appendRecords res = progGetResult()
 
   if !res.nil? and res["score"] > @score
     @score = res["score"]
@@ -67,6 +66,7 @@ def guessWord
   @currentBucket = @wordBucket[res[Word].length]
   @missingWord.clear
   wrongGuessNum = 0
+
   word = ''
   begin
     wrongGuessNum,word = guessLetter FirstGuessLetterTable[wrongGuessNum][res[Word].length-1]
@@ -84,20 +84,13 @@ def guessLetter letter
   @missingWord += [letter]
   res = progGuessWord letter.upcase
   print 'guess ',res[WrongGuessNumberStr],' wrong times ',res[Word],' letter:',letter,"\n"
-  # print @missingWord.join(''),' ',@currentBucket.length,' ',letter,"\n"
-  # print @currentLetterOrder.join(''),"\n" if !@currentLetterOrder.nil?
   [res[WrongGuessNumberStr],res[Word]]
 end
 
-# @lastWord = nil
 def highestRemainLetterOf word
-  # if word!=@lastWord
-  # @lastWord =
   word.gsub!('*','.').downcase!
   @incorrectWord = @missingWord-word.chars
-  @currentLetterOrder = getHighestAbilityLetterFrom Regexp.compile('^'+word+'$')
-  # end
-  @currentLetterOrder.pop[0]
+  getHighestAbilityLetterFrom(Regexp.compile('^'+word+'$')).pop[0]
 end
 
 def getHighestAbilityLetterFrom pattern
@@ -107,13 +100,12 @@ def getHighestAbilityLetterFrom pattern
   @currentBucket = remainWords
   if remainWords == []
     @newwordsBucket.each {|bucketWord|
-      word,missingWord = bucketWord.split(' ')
-      if pattern.match(word)
-        remainWords += [word]
-        break if !word.include? '*'
-        @missingWord = missingWord.split '' if !missingWord.nil?
+      if pattern.match(bucketWord)
+        remainWords += [bucketWord]
+        break
       end
     }
+    print remainWords
   end
   dict = statisticLetter remainWords
   @missingWord.each {|letter| dict.delete letter}
