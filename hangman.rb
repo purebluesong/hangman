@@ -37,6 +37,7 @@ def createWordsBucket
   puts 'words bucket init over'
 end
 
+#play the game once
 @score = 1363
 def play
   @newwordsBucket = readNewWords
@@ -62,6 +63,7 @@ def play
   end
 end
 
+#guess a word
 def guessWord
   res = progNextWord
   res[WORD_STR].chomp!
@@ -82,6 +84,7 @@ def guessWord
   res[TOTAL_WORD_COUNT]
 end
 
+#guess a letter
 def guessLetter letter
   @missingWord += [letter]
   res = progGuessWord letter.upcase
@@ -89,12 +92,14 @@ def guessLetter letter
   [res[WRONG_GUESS_NUMBER],res[WORD_STR]]
 end
 
+#find the highest ability remain letter of the word
 def highestRemainLetterOf word
   word.gsub!('*','.').downcase!
   @incorrectWord = @missingWord - word.chars
   getHighestAbilityLetterFrom(Regexp.compile('^'+word+'$')).pop[0]
 end
 
+#match the pattern and reduce the remainWords,return a list
 def getHighestAbilityLetterFrom pattern
   remainWords = []
   @currentBucket.each {|bucketWord|
@@ -103,7 +108,7 @@ def getHighestAbilityLetterFrom pattern
   remainWords.each{|word|
     remainWords.delete word if (word.chars - @incorrectWord) != word.chars
   }
-  remainWords = checkNewWords {|word| pattern.match(word.chomp)} if remainWords == []
+  remainWords = checkNewWords {|word| pattern.match(word)} if remainWords == []
   @currentBucket = remainWords
 
   dict = statisticLetter remainWords
@@ -111,17 +116,20 @@ def getHighestAbilityLetterFrom pattern
   getSortListFrom dict
 end
 
+#search the word in newwords table if i cant find it in main wordsList
 def checkNewWords
   @newwordsBucket.each {|bucketWord|
+    bucketWord.chomp!
     if yield(bucketWord)
       print bucketWord, "---remainWords\n"
-      return [bucketWord.chomp]
+      return [bucketWord]
     end
     puts 'findnone'
   }
   []
 end
 
+#statistic Letters frequet and return the frequent dict
 @alphabet = 'esiarntolcdupmghbyfvkwzxqj'
 def statisticLetter wordsList
   dict = {}
@@ -132,6 +140,7 @@ def statisticLetter wordsList
   dict
 end
 
+#sort the dict list by asend
 def getSortListFrom dict
   dict.to_a.sort {|x, y| x[1]<=>y[1]}
 end
