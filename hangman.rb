@@ -2,14 +2,15 @@ load 'mytool.rb'
 load 'webLayer_hangman.rb'
 
 #---------------------------config variable------------------------
-WordFileName = 'dict/words.txt'
-Word = "word"
-NumberOfWordsToGuess = "numberOfWordsToGuess"
-NumberOfGuessAllowedForEachWord = "numberOfGuessAllowedForEachWord"
-WrongGuessNumberStr = "wrongGuessCountOfCurrentWord"
-TotalWordCount = "totalWordCount"
+WORD_FILE_NAME = 'dict/words.txt'
+WORD_STR = "word"
+SCORE_STR = "score"
+NUMBER_OF_WORDS_TO_GUESS = "numberOfWordsToGuess"
+NUMBER_OF_GUESS_ALLOWED_FOR_EACH_WORD = "numberOfGuessAllowedForEachWord"
+WRONG_GUESS_NUMBER = "wrongGuessCountOfCurrentWord"
+TOTAL_WORD_COUNT = "totalWordCount"
 
-FirstGuessLetterTable = [
+FIRST_LETTER_TABLE = [
   'aaaseeeeeeeiiiiiiiiiteeeeeee',
   'oeeeaiiiiiieeeeeeeeeesssssss',
   'eooaiaaaoooooarrassssiiiiiii',
@@ -29,7 +30,7 @@ FirstGuessLetterTable = [
 
 def createWordsBucket
   @wordBucket = Array.new(30,[])
-  open(WordFileName,"rt").readlines.each {|line|
+  open(WORD_FILE_NAME,"rt").readlines.each {|line|
     line.chomp!
     @wordBucket[line.length] += [line]
   }
@@ -39,52 +40,53 @@ end
 @score = 1363
 def play
   @newwordsBucket = readNewWords
-  res = progStartGame()
-  wordsNum = res[NumberOfWordsToGuess]
-  @GuessNum = res[NumberOfGuessAllowedForEachWord]
+  res = progStartGame
+  wordsNum = res[NUMBER_OF_WORDS_TO_GUESS]
+  @GuessNum = res[NUMBER_OF_GUESS_ALLOWED_FOR_EACH_WORD]
+
   wordCount = 0
   while wordCount < wordsNum
     print "="*25, "the ", wordCount+1, "th guess", "="*25, "\n"
-    wordCount = guessWord()
+    wordCount = guessWord
   end
 
-  appendNewWords @newwords.join "\n"
+  appendNewWords(@newwords.join "\n")
   clearNewWords
-  appendRecords res = progGetResult()
+  appendRecords(res = progGetResult)
 
-  if !res.nil? and res["score"] > @score
-    @score = res["score"]
-    puts progSubmit()
+  if !res.nil? and res[SCORE_STR] > @score
+    @score = res[SCORE_STR]
+    puts progSubmit
   else
-    puts res["score"]
+    puts res[SCORE_STR]
   end
 end
 
 def guessWord
   res = progNextWord
-  res[Word].chomp!
-  @currentBucket = @wordBucket[res[Word].length]
+  res[WORD_STR].chomp!
+  @currentBucket = @wordBucket[res[WORD_STR].length]
   @missingWord.clear
   wrongGuessNum = 0
 
   word = ''
   begin
-    wrongGuessNum,word = guessLetter FirstGuessLetterTable[wrongGuessNum][res[Word].length-1]
-  end while (word.delete '*') == '' and wrongGuessNum < @GuessNum
+    wrongGuessNum,word = guessLetter FIRST_LETTER_TABLE[wrongGuessNum][res[WORD_STR].length-1]
+  end while '' == word.delete '*' and wrongGuessNum < @GuessNum
   puts '-'*50
   while wrongGuessNum < @GuessNum and word.include? '*'
     wrongGuessNum,word = guessLetter highestRemainLetterOf word
   end
 
   @newwords += [word] if @currentBucket == [] and word.length > 0 and !word.include? '*'
-  res[TotalWordCount]
+  res[TOTAL_WORD_COUNT]
 end
 
 def guessLetter letter
   @missingWord += [letter]
   res = progGuessWord letter.upcase
-  print 'guess ',res[WrongGuessNumberStr],' wrong times ',res[Word],' letter:',letter,"\n"
-  [res[WrongGuessNumberStr],res[Word]]
+  print 'guess ',res[WRONG_GUESS_NUMBER],' wrong times ',res[WORD_STR],' letter:',letter,"\n"
+  [res[WRONG_GUESS_NUMBER],res[WORD_STR]]
 end
 
 def highestRemainLetterOf word
@@ -105,9 +107,7 @@ def getHighestAbilityLetterFrom pattern
   @currentBucket = remainWords
 
   dict = statisticLetter remainWords
-  @missingWord.each {|letter|
-    dict.delete letter
-  }
+  @missingWord.each {|letter| dict.delete letter}
   getSortListFrom dict
 end
 
@@ -117,8 +117,8 @@ def checkNewWords
       print bucketWord, "---remainWords\n"
       return [bucketWord.chomp]
     end
-  puts 'findnone'
-}
+    puts 'findnone'
+  }
   []
 end
 
