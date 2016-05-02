@@ -36,27 +36,28 @@ def createWordsBucket
   puts 'words bucket init over'
 end
 
-@score = 1360
+@score = 1363
 def play()
   @newwordsBucket = readNewWords
   res = progStartGame()
   wordsNum = res[NumberOfWordsToGuess]
   @GuessNum = res[NumberOfGuessAllowedForEachWord]
   wordCount = 0
-  begin
+  while wordCount < wordsNum
     print "="*25,"the ",wordCount+1,"th guess","="*25,"\n"
     wordCount = guessWord()
-  end while wordCount < wordsNum
+  end
 
   appendNewWords @newwords.join "\n"
   clearNewWords
-  appendRecords res = progGetResult()
+  res = progGetResult()
+  appendRecords res
 
-  if !res[Data].nil? and res[Data]["score"] > @score
-    @score = res[Data]["score"]
+  if !res.nil? and res["score"] > @score
+    @score = res["score"]
     puts progSubmit()
   else
-    puts res[Data]["score"]
+    puts res["score"]
   end
 end
 
