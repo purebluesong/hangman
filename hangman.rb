@@ -74,7 +74,7 @@ def guessWord
   word = ''
   begin
     wrongGuessNum,word = guessLetter FIRST_LETTER_TABLE[wrongGuessNum][res[WORD_STR].length-1]
-  end while '' == word.delete '*' and wrongGuessNum < @GuessNum
+  end while '' == word.delete('*') and wrongGuessNum < @GuessNum
   puts '-'*50
   while wrongGuessNum < @GuessNum and word.include? '*'
     wrongGuessNum,word = guessLetter highestRemainLetterOf word
