@@ -124,8 +124,8 @@ def checkNewWords
       print bucketWord, "---remainWords\n"
       return [bucketWord]
     end
-    puts 'findnone'
   }
+  puts 'findnone'
   []
 end
 
