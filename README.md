@@ -1,6 +1,6 @@
 # hangman
 
-算是strinkly后端开发岗的笔试题？
+算是strikingly后端开发岗的笔试题？
 
 
 具体的实现思路和[这里](https://ruby-china.org/topics/16256)的类似，也是动态词频统计，选择最有可能的字母去猜
